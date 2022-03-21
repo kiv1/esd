@@ -1,4 +1,9 @@
-# esd
+# ESD
+
+## Important
+#### Please do not push code here.
+#### Please push code to their respective repo.
+#### This a consolidation of the different micro service so we can run all with docker.
 
 Submodule Configuration
 ------------
