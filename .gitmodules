@@ -1,0 +1,15 @@
+[submodule "react-shop-ui"]
+	path = react-shop-ui
+	url = https://github.com/Chong-hui/react-shop-ui.git
+[submodule "order"]
+	path = order
+	url = https://github.com/syafinazshahrinshan/order.git
+[submodule "inventory_postgres"]
+	path = inventory_postgres
+	url = https://github.com/syafinazshahrinshan/inventory_postgres.git
+[submodule "esd-stripe"]
+	path = esd-stripe
+	url = https://github.com/huilynt/esd-stripe.git
+[submodule "Email-microservice"]
+	path = Email-microservice
+	url = https://github.com/Diyanah01/Email-microservice.git
