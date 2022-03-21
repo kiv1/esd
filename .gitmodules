@@ -13,3 +13,6 @@
 [submodule "Email-microservice"]
 	path = Email-microservice
 	url = https://github.com/Diyanah01/Email-microservice.git
+[submodule "RabbitMQ-Service"]
+	path = RabbitMQ-Service
+	url = https://github.com/branfats/RabbitMQ-Service.git
