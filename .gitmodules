@@ -16,3 +16,6 @@
 [submodule "RabbitMQ-Service"]
 	path = RabbitMQ-Service
 	url = https://github.com/branfats/RabbitMQ-Service.git
+[submodule "auth-webhook"]
+	path = auth-webhook
+	url = https://github.com/kiv1/auth-webhook.git
