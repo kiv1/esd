@@ -22,5 +22,5 @@ git submodule update --recursive --remote
 
 Submodule repository has changed
 ```shell
-git pull --recurse-submodules
+git submodule foreach git pull origin main
 ```
