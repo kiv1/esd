@@ -19,3 +19,6 @@
 [submodule "auth-webhook"]
 	path = auth-webhook
 	url = https://github.com/kiv1/auth-webhook.git
+[submodule "cart"]
+	path = cart
+	url = https://github.com/kiv1/cart.git
