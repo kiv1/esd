@@ -22,3 +22,6 @@
 [submodule "cart"]
 	path = cart
 	url = https://github.com/kiv1/cart.git
+[submodule "complex-cart"]
+	path = complex-cart
+	url = https://github.com/kiv1/complex-cart.git
