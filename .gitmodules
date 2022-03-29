@@ -25,3 +25,7 @@
 [submodule "complex-cart"]
 	path = complex-cart
 	url = https://github.com/kiv1/complex-cart.git
+
+[submodule "checkout"]
+	path = checkout
+	url = https://github.com/kiv1/checkout.git
