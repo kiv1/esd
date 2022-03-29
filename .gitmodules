@@ -29,3 +29,6 @@
 [submodule "checkout"]
 	path = checkout
 	url = https://github.com/kiv1/checkout.git
+[submodule "gateway"]
+	path = gateway
+	url = https://github.com/kiv1/gateway.git
