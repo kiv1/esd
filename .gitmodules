@@ -32,3 +32,6 @@
 [submodule "gateway"]
 	path = gateway
 	url = https://github.com/kiv1/gateway.git
+[submodule "complex-order"]
+	path = complex-order
+	url = https://github.com/kiv1/complex-order.git
