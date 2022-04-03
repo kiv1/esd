@@ -117,10 +117,10 @@ Stripe Webhook and Credentials
 
 8) Under endpoint add your stripe endpoint "https://{local_tunnel}.loca.lt/Checkout"
 
-
 IMPORTANT: BE SURE TO OPEN A NEW TERMINAL TO RUN THE LOCALTUNNEL COMMAND
 PLEASE REPLACE {local_tunnel} WITH THE URL PROVIDED BY LOCALTUNNEL
 "lt --port 7329"
+BE SURE TO CLICK THE NEDPOINT IN YOUR TERMINAL SO THAT THE LINK IS ACTIVE
 
 9) Click  "Select events" and search for "payment_intent.succeeded"
 
