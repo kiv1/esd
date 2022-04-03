@@ -1,12 +1,246 @@
 version: "3.7"
 services:
-  auth-test:
+  # ******************************
+  # AMQP
+  # ******************************
+  rabbitmq:
+    image: rabbitmq:3-management    
+    volumes:
+      - mq:/var/lib/rabbitmq  
+    ports:
+      - 15672:15672
+      - 5672:5672
+  # ******************************
+  # Postgres - Databases
+  # ******************************
+  user-postgres:
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres    
+    restart: always
+    volumes:
+      - user_db:/var/lib/postgres
+    ports:
+      - '5431:5432'
+
+  inventory-postgres:
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres    
+    restart: always
+    volumes:
+      - inventory_db:/var/lib/postgres
+    ports:
+      - '5432:5432'
+
+  order-postgres:
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres    
+    restart: always
+    volumes:
+      - order_db:/var/lib/postgres
+    ports:
+      - '5433:5432'
+
+  cart-postgres:
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres    
+    restart: always
+    volumes:
+      - cart_db:/var/lib/postgres
+    ports:
+      - '5434:5432'
+
+  # ******************************
+  # Microservices
+  # ******************************
+
+  user:
     build:
       context: ./auth-webhook
       dockerfile: Dockerfile
     environment:
-      DB_HOST: 172.17.0.2
+      DB_HOST: user-postgres
+      DB_PORT: 5432
       DB_USERNAME: postgres
-      DB_PASSWORD: password
+      DB_PASSWORD: postgres
     ports:
       - '7321:8080'
+    depends_on:
+      - user-postgres
+      - inventory-postgres
+      - order-postgres
+      - cart-postgres
+    restart: always
+
+  inventory:
+    build:
+      context: ./inventory_postgres
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: inventory-postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - '7322:3050'
+    depends_on:
+      - user
+      - inventory-postgres
+    restart: always
+
+  order:
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: order-postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - '7323:3000'
+    depends_on:
+      - inventory
+      - order-postgres
+    restart: always
+
+  cart:
+    build:
+      context: ./cart
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: cart-postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - '7324:3050'
+    depends_on:
+      - order
+      - cart-postgres
+
+  complex-cart:
+    build:
+      context: ./complex-cart
+      dockerfile: Dockerfile
+    environment:
+      AUTH_URL: http://user:8080
+      CART_URL: http://cart:3050
+      INVENTORY_URL: http://inventory:3050
+    ports:
+      - '7325:80'
+      - '7326:443'
+    depends_on:
+      - cart
+      - user
+      - inventory
+
+  mq-sender:
+    build:
+      context: ./RabbitMQ-Service
+      dockerfile: Dockerfile
+    environment:
+      AMQP: amqp://guest:guest@rabbitmq:5672
+    ports:
+      - '7327:3000'
+    depends_on:
+      - complex-cart
+      - rabbitmq
+
+  mq-consumer:
+    build:
+      context: ./Email-microservice
+      dockerfile: Dockerfile
+    environment:
+      AMQP: amqp://guest:guest@rabbitmq:5672
+      SENDGRID_API: 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
+      SENDGRID_EMAIL: esd.customer.supp@gmail.com
+    depends_on:
+      - mq-sender
+      - rabbitmq
+    restart: always
+
+  stripe:
+    build:
+      context: ./esd-stripe
+      dockerfile: Dockerfile
+    environment:
+      SECRET_KEY: sk_test_51KkJtwIiKFgE5ukd5kYt6xgkjK3HF7CgoVrtntOw1Hbe61sdxgqibPuv6wSJ3vVBFkPQfYz3vSzr5Memd5hU09st00aZbpjjQE
+    ports:
+      - '7328:3000'
+    depends_on:
+      - mq-consumer
+
+  checkout:
+    build:
+      context: ./checkout
+      dockerfile: Dockerfile
+    environment:
+      AUTH_URL: http://user:8080
+      CART_URL: http://cart:3050
+      INVENTORY_URL: http://inventory:3050
+      COMPLEX_CART_URL: http://complex-cart:80
+      ORDER_URL: http://order:3000
+      STRIPE_URL: http://stripe:3000
+      EMAIL_URL: http://mq-sender:3000
+      STRIPE_SECRET: whsec_eyGSDYTnSL8JRoJ8Li7QEodnyrhepYPc    
+    ports:
+      - '7329:80'
+      - '7330:443'
+    depends_on:
+      - stripe
+
+  update-order:
+    build:
+      context: ./complex-order
+      dockerfile: Dockerfile
+    environment:
+      AUTH_URL: http://user:8080
+      ORDER_URL: http://order:3000
+      EMAIL_URL: http://mq-sender:3000
+    ports:
+      - '7333:80'
+      - '7334:443'
+    depends_on:
+      - checkout
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    environment:
+      AUTHORITY_URL: https://dev-f096c5sh.us.auth0.com/
+      AUDIENCE_NAME: gateway
+    ports:
+      - '7331:80'
+      - '7332:443'
+    depends_on:
+      - update-order
+
+  frontend:
+    build:
+      context: ./react-shop-ui
+      dockerfile: Dockerfile
+    ports:
+      - '7335:3000'
+    environment:
+      REACT_APP_AUTH0_DOMAIN: dev-f096c5sh.us.auth0.com
+      REACT_APP_AUTH0_CLIENT_ID: QRAjV934nVOblP6NkO5V6gZRnKrU8EyO
+      REACT_APP_AUTH0_AUDIENCE: gateway
+      REACT_APP_STRIPE_PUBLIC_KEY: pk_test_51KkJtwIiKFgE5ukdmdeBX6blHGK7IkHijX7uGVcTYzaIW2F1gYFX0hZDSFe90SZXoDi8WH75tfbcqWxOp2DN2Vpd00YQXlUsJX
+    depends_on:
+      - gateway
+
+volumes:
+  mq:
+  user_db:
+  inventory_db:
+  order_db:
+  cart_db:
