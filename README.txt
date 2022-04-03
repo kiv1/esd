@@ -47,36 +47,35 @@ Auth0 Webhook and JWT
 6) Under the "Connections" tab located in between of "Addons" and "Organizartions"
 Disable "Username-Password-Authentication"  
 
-
-6) Go under API and Create one (This shall be used for our API-Gateway JWT token)
+7) Go under API and Create one (This shall be used for our API-Gateway JWT token)
 - Under "Name" you can put anything
 - Under "Identifier" for simplicity sake you may put "gateway" 
 (REACT_APP_AUTH0_AUDIENCE under frontend and AUDIENCE_NAME under gateway)
 
-7) You will see a Quick Start page and click C#. 
+8) You will see a Quick Start page and click C#. 
 Copy the Authority and Audience string into the docker-compose.yml
 (REACT_APP_AUTH0_AUDIENCE under frontend and AUDIENCE_NAME under gateway,
 For Authority AUTHORITY_URL found under gateway)
 
-8) To setup a webhook back to our machine go yo the left panel and click "Actions" --> "Flows"
+9) To setup a webhook back to our machine go to the left panel and click "Actions" --> "Flows"
 
-9) Click "Login" and exit the tour
+10) Click "Login" and exit the tour
 
-10) Click the "+" icon on the right hand side --> "Build Custom" to create an action
+11) Click the "+" icon on the right hand side --> "Build Custom" to create an action
 - "Name" can be anything
 - Click "Create"
 
-11) Click on the left, the 3rd icon of the Auth0 IDE that looks like a box. 
+12) Click on the left, the 3rd icon of the Auth0 IDE that looks like a box. 
 This is to add Dependency.
 
-12) Click on "Add Dependency"
+13) Click on "Add Dependency"
 - "Name" put axios
 - Click "Create"
 
-13) Create a new line after line 6 and paste
+14) Create a new line after line 6 and paste
 const axios = require("axios");
 
-14) Between line 8 ("exports.onExecutePostLogin = async (event, api) => {") 
+15) Between line 8 ("exports.onExecutePostLogin = async (event, api) => {") 
 and 9 ("};") and paste the following
 
 await axios.post("https://{ngrok_provided_url}/auth/webhook", { params: { id: event.user.user_id, name: event.user.name, email: event.user.email}});
@@ -84,14 +83,14 @@ await axios.post("https://{ngrok_provided_url}/auth/webhook", { params: { id: ev
 IMPORTANT PLEASE REPLACE {ngrok_provided_url} WITH THE LINK PROVIDED BY NGROK 
 AFTER RUNNING "ngrok http 7321"
 
-15) Click "Deploy"
+16) Click "Deploy"
 
-16) Go back to the Login Flow page anc click the custom tab
+17) Go back to the Login Flow page anc click the custom tab
 
-17 Now you will see your newly created webhook. 
+18 Now you will see your newly created webhook. 
 Drag it to the flow. It should be in between start and complete.
 
-18) Click apply
+19) Click apply
 
 Your Auth0 is now ready
 
@@ -135,3 +134,11 @@ BE SURE TO CLICK THE NEDPOINT IN YOUR TERMINAL SO THAT THE LINK IS ACTIVE
 14) Copy the string to your docker-compose.yml and replace "STRIPE_SECRET" under chekcout
 
 Your Stripe is now ready
+
+Simulations
+------------------------------
+After your order is in a pending stage
+
+HTTP PUT on postman
+http://localhost:7333/UpdateOrder/sent/{orderid}
+
